@@ -1,0 +1,52 @@
+{
+  "name": "connect24",
+  "version": "0.1.0",
+  "description": "Official Node client for the Connect24 communications API — email, SMS and WhatsApp.",
+  "keywords": [
+    "sms",
+    "email",
+    "whatsapp",
+    "messaging-api",
+    "sms-api",
+    "south-africa",
+    "popia",
+    "connect24"
+  ],
+  "homepage": "https://connect24.co.za/developer",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lihle2018/connect24-node.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Lihle2018/connect24-node/issues"
+  },
+  "license": "MIT",
+  "author": "Connect24",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test test/*.test.js",
+    "pretest": "npm run build",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "typescript": "^5.8.2"
+  }
+}

@@ -1,0 +1,46 @@
+name: Publish to npm
+
+# Tag-driven, so a release is a deliberate act with a name rather than whatever landed on main.
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: npm
+
+    permissions:
+      # Trusted publishing: GitHub mints a short-lived OIDC token and npm verifies it came from
+      # this repo and this workflow, so there is no NPM_TOKEN to store or leak. It also produces a
+      # provenance attestation automatically, which is what lets somebody installing the package
+      # check it was built from this source.
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+
+      # Trusted publishing needs npm 11.5.1 or newer; Node 22 ships something older.
+      - run: npm install -g npm@latest
+
+      - name: Refuse a tag that disagrees with the package version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          VERSION=$(node -p "require('./package.json').version")
+          if [ "$TAG" != "$VERSION" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match version $VERSION in package.json." >&2
+            exit 1
+          fi
+          echo "Publishing $VERSION"
+
+      - run: npm ci
+      - run: npm test
+
+      # prepublishOnly builds and tests again; --provenance is implied by trusted publishing.
+      - run: npm publish --access public

@@ -1,7 +1,7 @@
 {
   "name": "connect24",
   "version": "0.1.0",
-  "description": "Official Node client for the Connect24 communications API \u2014 email, SMS and WhatsApp.",
+  "description": "Official Node client for the Connect24 communications API — email, SMS and WhatsApp.",
   "keywords": [
     "sms",
     "email",

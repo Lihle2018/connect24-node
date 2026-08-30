@@ -1,46 +1,102 @@
-name: Publish to npm
+name: Release
 
-# Tag-driven, so a release is a deliberate act with a name rather than whatever landed on main.
+# Two ways in, and neither needs anything on your machine:
+#
+#   Actions -> Release -> Run workflow -> type 0.2.0
+#   or: git tag v0.2.0 && git push origin v0.2.0
+#
+# The first bumps package.json, commits it, tags it and publishes. The second publishes a tag you
+# made yourself, after checking the tag and the manifest agree.
 on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release, without the leading v (e.g. 0.2.0)'
+        required: true
+        type: string
   push:
     tags: ['v*']
 
 jobs:
-  publish:
+  release:
     runs-on: ubuntu-latest
     environment: npm
 
     permissions:
-      # Trusted publishing: GitHub mints a short-lived OIDC token and npm verifies it came from
-      # this repo and this workflow, so there is no NPM_TOKEN to store or leak. It also produces a
-      # provenance attestation automatically, which is what lets somebody installing the package
-      # check it was built from this source.
+      # Short-lived OIDC credential for the registry — no stored token anywhere.
       id-token: write
-      contents: read
+      # Lets the run commit the version bump and push the tag.
+      contents: write
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The bump is committed back, so the run needs the branch rather than a detached commit.
+          ref: ${{ github.head_ref || github.ref_name }}
+          fetch-depth: 0
+
+      - name: Work out the version
+        id: v
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ inputs.version }}"
+          else
+            VERSION="${GITHUB_REF_NAME#v}"
+          fi
+          if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?$'; then
+            echo "Not a version: $VERSION" >&2
+            exit 1
+          fi
+          echo "value=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Releasing $VERSION"
+
+      - name: Bump, commit and tag
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          VERSION="${{ steps.v.outputs.value }}"
+
+          if git rev-parse "v$VERSION" >/dev/null 2>&1; then
+            echo "v$VERSION already exists. Pick a new version — a published release is permanent." >&2
+            exit 1
+          fi
+
+          npm version "$VERSION" --no-git-tag-version --allow-same-version
+
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet; then
+            echo "Nothing changed — the manifest already says $VERSION." >&2
+          else
+            git add -A
+            git commit -m "chore: release $VERSION"
+            git push
+          fi
+
+          git tag "v$VERSION"
+          git push origin "v$VERSION"
+
+      - name: Refuse a tag that disagrees with the manifest
+        if: github.event_name == 'push'
+        run: |
+          VERSION="${{ steps.v.outputs.value }}"
+          ACTUAL=$(node -p "require('./package.json').version")
+          if [ "$ACTUAL" != "$VERSION" ]; then
+            echo "Tag says $VERSION, package.json says $ACTUAL." >&2
+            exit 1
+          fi
 
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
 
-      # Trusted publishing needs npm 11.5.1 or newer; Node 22 ships something older.
+      # Trusted publishing needs npm 11.5.1 or newer; Node 22 ships something older, and the
+      # failure without this does not mention the version.
       - run: npm install -g npm@latest
-
-      - name: Refuse a tag that disagrees with the package version
-        run: |
-          TAG="${GITHUB_REF_NAME#v}"
-          VERSION=$(node -p "require('./package.json').version")
-          if [ "$TAG" != "$VERSION" ]; then
-            echo "Tag $GITHUB_REF_NAME does not match version $VERSION in package.json." >&2
-            exit 1
-          fi
-          echo "Publishing $VERSION"
 
       - run: npm ci
       - run: npm test
 
-      # prepublishOnly builds and tests again; --provenance is implied by trusted publishing.
+      # Provenance is automatic under trusted publishing — no --provenance flag needed.
       - run: npm publish --access public

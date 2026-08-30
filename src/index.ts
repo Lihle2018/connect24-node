@@ -4,7 +4,7 @@
  * One interface for email, SMS and WhatsApp:
  *
  * ```ts
- * import { Connect24 } from 'connect24';
+ * import { Connect24 } from '@connect24/sdk';
  *
  * const client = Connect24.fromEnv();
  * await client.messages.sendSms('+27821234567', 'Your order has shipped.');

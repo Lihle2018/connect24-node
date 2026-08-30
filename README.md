@@ -4,7 +4,7 @@ Official Node client for the [Connect24](https://connect24.co.za) communications
 one interface for email, SMS and WhatsApp.
 
 ```bash
-npm install connect24
+npm install @connect24/sdk
 ```
 
 No runtime dependencies — it uses the `fetch` built into Node 18 and newer. An SDK is a
@@ -16,7 +16,7 @@ yours to resolve.
 Get your **account id** and an **API key** from the portal, under Settings → API keys.
 
 ```ts
-import { Connect24 } from 'connect24';
+import { Connect24 } from '@connect24/sdk';
 
 const client = new Connect24({
   accountId: 'acc_3f9c1a7b4e2d',
@@ -98,7 +98,7 @@ Verify against the **raw body**, before any framework parses it.
 
 ```ts
 import express from 'express';
-import { parseWebhookEvent, verifySignature } from 'connect24';
+import { parseWebhookEvent, verifySignature } from '@connect24/sdk';
 
 app.post(
   '/hooks/connect24',
@@ -122,7 +122,7 @@ Delivery is at-least-once. Deduplicate on `event.id`.
 ## Errors
 
 ```ts
-import { Connect24ApiError, Connect24ConnectionError } from 'connect24';
+import { Connect24ApiError, Connect24ConnectionError } from '@connect24/sdk';
 
 try {
   await client.messages.sendSms('+27821234567', 'Hello');

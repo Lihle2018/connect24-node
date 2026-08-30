@@ -37,7 +37,7 @@ export interface Connect24Options {
  * attributed to you.
  *
  * ```ts
- * import { Connect24 } from 'connect24';
+ * import { Connect24 } from '@connect24/sdk';
  *
  * const client = new Connect24({
  *   accountId: 'acc_3f9c1a7b4e2d',

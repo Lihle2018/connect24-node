@@ -30,7 +30,7 @@ export class Connect24ConnectionError extends Connect24Error {}
  * - `402` — out of credit; retrying will not help
  * - `409` — a conflict, usually a name already taken
  * - `429` — rate limited (already retried a few times before you see this)
- * - `502` — the upstream provider refused the message or could not be reached
+ * - `502` — the message could not be handed on for delivery; safe to retry
  */
 export class Connect24ApiError extends Connect24Error {
   readonly statusCode: number;

@@ -16,7 +16,6 @@ export interface MessageAccepted {
   channel: string;
   /** Accepted, not delivered. Delivery is reported by webhook. */
   status: string;
-  provider: string;
 }
 
 export interface Message {
@@ -26,7 +25,6 @@ export interface Message {
   from: string;
   to: string;
   status: string;
-  provider: string;
   failureReason?: string | null;
   createdAt: string;
   updatedAt?: string | null;

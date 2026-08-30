@@ -24,7 +24,6 @@ export interface SendOptions {
   headers?: Record<string, string>;
   tags?: string[];
   metadata?: Record<string, string>;
-  provider?: string;
   /**
    * Pass one when a network failure leaves you unsure whether a send arrived. A repeat with the
    * same key returns the original message instead of sending again.

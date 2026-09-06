@@ -1,0 +1,13 @@
+{
+  "name": "connect24-sample-order-notifications",
+  "private": true,
+  "type": "module",
+  "description": "Realistic Connect24 sample: order-shipped notifications with idempotent retries, suppression handling and tests.",
+  "scripts": {
+    "start": "node main.mjs",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@connect24/sdk": "file:../.."
+  }
+}

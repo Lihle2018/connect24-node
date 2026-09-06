@@ -169,3 +169,10 @@ npm run typecheck
 
 - [API documentation](https://connect24.co.za/developer)
 - [Support](mailto:support@connect24.co.za)
+
+## Samples
+
+Realistic, tested sample code lives in [`samples/order-notifications`](samples/order-notifications) — an order-shipped notification
+service showing idempotent retries, suppression handling, and out-of-credit alerting, with
+its own test suite you can run without an API key. Start there when integrating (or when
+pointing an AI assistant at this SDK).

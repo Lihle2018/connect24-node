@@ -24,3 +24,11 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
+
+      # The samples are part of the contract: each ships with tests that drive the real
+      # SDK over a stubbed transport, and they must stay green with the SDK they sit on.
+      - name: Sample tests
+        working-directory: samples/order-notifications
+        run: |
+          npm install --no-audit --no-fund
+          npm test
